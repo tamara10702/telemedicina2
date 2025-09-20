@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{9986F1F6-175B-4DD1-B5FC-A5CE1521D83B}</ProjectGuid>
+    <ProjectGuid>{6A5BC9FC-6390-42CD-8524-08B0A70E319B}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>telemedicina2</RootNamespace>
-    <AssemblyName>telemedicina2</AssemblyName>
+    <RootNamespace>TerapeutskaJedinica</RootNamespace>
+    <AssemblyName>TerapeutskaJedinica</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -43,11 +43,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="TerapeutskaJedinica.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Klase\Klase.csproj">
+      <Project>{3A7E9921-C58E-4046-8802-6ED134B97E80}</Project>
+      <Name>Klase</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
