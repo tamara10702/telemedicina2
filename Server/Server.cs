@@ -33,18 +33,26 @@ namespace Server
             {
                 try
                 {
-
                     int brBajta = acceptedSocket.Receive(buffer);
                     if (brBajta == 0) break;
 
                     using (MemoryStream ms = new MemoryStream(buffer, 0, brBajta))
                     {
-                        Pacijent p = (Pacijent)binaryFormatter.Deserialize(ms);
-                        pacijenti.Add(p);
-                        p = ProslediJedinici(p);
+                        PaketPacijenata paket = (PaketPacijenata)binaryFormatter.Deserialize(ms);
 
-                        Console.WriteLine("Ažurirani podaci o pacijentu:");
-                        p.Ispisi();
+                        foreach (var p in paket.Urgentni)
+                        {
+                            Pacijent odgovor = ProslediJedinici(p);
+                            Console.WriteLine("Ažurirani podaci o pacijentu (urgentni):");
+                            odgovor.Ispisi();
+                        }
+
+                        foreach (var p in paket.Ostali)
+                        {
+                            Pacijent odgovor = ProslediJedinici(p);
+                            Console.WriteLine("Ažurirani podaci o pacijentu (ostali):");
+                            odgovor.Ispisi();
+                        }
                     }
                 }
                 catch (Exception ex)
