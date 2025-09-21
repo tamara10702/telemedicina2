@@ -1,5 +1,6 @@
 ﻿using Klase;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -19,6 +20,12 @@ namespace telemedicina2
             Console.WriteLine("Klijent uspešno povezan sa serverom!");
 
             BinaryFormatter bf = new BinaryFormatter();
+
+            PaketPacijenata Pacijenti = new PaketPacijenata
+            {
+                Urgentni = new List<Pacijent>(),
+                Ostali = new List<Pacijent>()
+            };
 
             while (true)
             {
@@ -48,16 +55,34 @@ namespace telemedicina2
                         VrstaZahteva = izbor,
                     };
 
-                    using (MemoryStream ms = new MemoryStream())
+                    if (pacijent.VrstaZahteva.ToLower() == "urgentna pomoc" || pacijent.VrstaZahteva.ToLower() == "urgentna pomoć")
                     {
-                        bf.Serialize(ms, pacijent);
-                        byte[] data = ms.ToArray();
-                        klijentSocket.Send(data);
+                        Pacijenti.Urgentni.Add(pacijent);
+                    }
+                    else
+                    {
+                        Pacijenti.Ostali.Add(pacijent);
                     }
 
-                    Console.WriteLine("Zahtev uspešno poslat!");
+                    if (Pacijenti.Urgentni.Count + Pacijenti.Ostali.Count == 5)
+                    {
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            bf.Serialize(ms, Pacijenti);
+                            byte[] data = ms.ToArray();
+                            klijentSocket.Send(data);
+                        }
 
-                    Console.WriteLine("Da li želite da unesete još jednog pacijenta? (da/ne)");
+                        Console.WriteLine("Paketi sa 5 pacijenata poslati serveru!");
+
+                        Pacijenti = new PaketPacijenata
+                        {
+                            Urgentni = new List<Pacijent>(),
+                            Ostali = new List<Pacijent>()
+                        };
+                    }
+
+                    Console.WriteLine("Da li želite da unesete još pacijenata ? (da / ne)");
                     string odgovor = Console.ReadLine().ToLower();
                     if (odgovor != "da")
                         break;
@@ -65,7 +90,19 @@ namespace telemedicina2
                 else
                 {
                     Console.WriteLine("Nedostupna usluga. Unesite podatke ponovo.");
+                    continue;
                 }
+            }
+
+            if (Pacijenti.Urgentni.Count + Pacijenti.Ostali.Count > 0)
+            {
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    bf.Serialize(ms, Pacijenti);
+                    byte[] data = ms.ToArray();
+                    klijentSocket.Send(data);
+                }
+                Console.WriteLine("Preostali pacijenti poslati serveru!");
             }
 
             Console.WriteLine("Klijent završava sa radom.");
