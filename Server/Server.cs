@@ -113,6 +113,7 @@ namespace Server
                     Pacijent odgovor = (Pacijent)formatter.Deserialize(msIn);
 
                     jedinica.Status = Zauzece.Slobodna;
+                    odgovor.vremeObradeZahteva = DateTime.Now.AddSeconds(0);
                     IspisiStanje(pacijentiZaIspis, jedinice);
                     client.Close();
                     return odgovor;
@@ -142,8 +143,8 @@ namespace Server
 
             Console.WriteLine("STANJE PACIJENATA");
             Console.WriteLine(
-                "{0,-10} | {1,-15} | {2,-15} | {3,-20} | {4,-20}",
-                "LBO", "Ime", "Prezime", "Vrsta zahteva", "Status"
+                "{0,-10} | {1,-15} | {2,-15} | {3,-20} | {4,-20} | {5, -20}",
+                "LBO", "Ime", "Prezime", "Vrsta zahteva", "Status", "Vreme obrade"
             );
             Console.WriteLine(new string('-', 90));
 
@@ -151,8 +152,8 @@ namespace Server
             {
                 string status = string.IsNullOrEmpty(p.StatusPacijenta) ? "Nepoznat" : p.StatusPacijenta;
                 Console.WriteLine(
-                    "{0,-10} | {1,-15} | {2,-15} | {3,-20} | {4,-20}",
-                    p.LBO, p.Ime, p.Prezime, p.VrstaZahteva, status
+                    "{0,-10} | {1,-15} | {2,-15} | {3,-20} | {4,-20} | {5, -20}",
+                    p.LBO, p.Ime, p.Prezime, p.VrstaZahteva, status, p.vremeObradeZahteva
                 );
             }
         }
