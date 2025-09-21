@@ -8,11 +8,11 @@ namespace Klase
     {
         public TipJedinice TipJedinice { get; set; }
         public int IDjedinice { get; set; }
-        public string Status { get; set; }
+        public Zauzece Status { get; set; }
 
         public Jedinica() { }
 
-        public Jedinica(TipJedinice tipJedinice, int iDjedinice, string status)
+        public Jedinica(TipJedinice tipJedinice, int iDjedinice, Zauzece status)
         {
             TipJedinice = tipJedinice;
             IDjedinice = iDjedinice;
