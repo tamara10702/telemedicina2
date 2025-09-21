@@ -1,4 +1,5 @@
-﻿using Klase;
+﻿using Enumeracije;
+using Klase;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,6 +11,11 @@ namespace Server
 {
     public class Server
     {
+        static Jedinica urgentna = new Jedinica(TipJedinice.Urgentna, 1, Zauzece.Slobodna);
+        static Jedinica terapeutska = new Jedinica(TipJedinice.Terapeutska, 2, Zauzece.Slobodna);
+        static Jedinica dijagnosticka = new Jedinica(TipJedinice.Dijagnosticka, 3, Zauzece.Slobodna);
+        static List<Jedinica> jedinice = new List<Jedinica> { urgentna, terapeutska, dijagnosticka };
+
         static void Main(string[] args)
         {
             Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -42,14 +48,14 @@ namespace Server
 
                         foreach (var p in paket.Urgentni)
                         {
-                            Pacijent odgovor = ProslediJedinici(p);
+                            Pacijent odgovor = ProslediJedinici(p, urgentna);
                             pacijentiZaIspis.Add(odgovor);
                             IspisiTabelu(pacijentiZaIspis);
                         }
 
                         foreach (var p in paket.Ostali)
                         {
-                            Pacijent odgovor = ProslediJedinici(p);
+                            Pacijent odgovor = ProslediJedinici(p, (p.VrstaZahteva=="terapija") ? terapeutska : dijagnosticka);
                             pacijentiZaIspis.Add(odgovor);
                             IspisiTabelu(pacijentiZaIspis);
                         }
@@ -68,7 +74,7 @@ namespace Server
             Console.ReadKey();
         }
 
-        static Pacijent ProslediJedinici(Pacijent p)
+        static Pacijent ProslediJedinici(Pacijent p, Jedinica jedinica)
         {
             int port = 0;
 
@@ -93,6 +99,9 @@ namespace Server
                 Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 client.Connect(IPAddress.Loopback, port);
 
+                jedinica.Status = Zauzece.Zauzeta;
+                IspisiTabeluJedinica(jedinice);
+
                 BinaryFormatter formatter = new BinaryFormatter();
                 using (MemoryStream ms = new MemoryStream())
                 {
@@ -105,6 +114,9 @@ namespace Server
                 using (MemoryStream msIn = new MemoryStream(buffer, 0, received))
                 {
                     Pacijent odgovor = (Pacijent)formatter.Deserialize(msIn);
+
+                    jedinica.Status = Zauzece.Slobodna;
+                    IspisiTabeluJedinica(jedinice);
                     client.Close();
                     return odgovor;
                 }
@@ -134,6 +146,16 @@ namespace Server
                     p.LBO, p.Ime, p.Prezime, p.VrstaZahteva, status
                 );
             }
+        }
+
+        static void IspisiTabeluJedinica(List<Jedinica> jedinice)
+        {
+            Console.WriteLine("TIP JEDINICE\tSTATUS");
+            foreach (var j in jedinice)
+            {
+                Console.WriteLine($"{j.TipJedinice}\t\t{j.Status}");
+            }
+            Console.WriteLine(); // razmak pre tabele pacijenata
         }
     }
 }
