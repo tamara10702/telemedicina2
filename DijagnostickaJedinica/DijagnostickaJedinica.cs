@@ -31,7 +31,7 @@ namespace DijagnostickaJedinica
                     Pacijent p = (Pacijent)formatter.Deserialize(ms);
                     Console.WriteLine($"Obrada pacijenta: {p.Ime} {p.Prezime}");
 
-                    System.Threading.Thread.Sleep(1000);
+                    System.Threading.Thread.Sleep(3000);
 
                     p.StatusPacijenta = "pregledan/a";
                     Console.WriteLine("Obavljen je pregled pacijenta.");

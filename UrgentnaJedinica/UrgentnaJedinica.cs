@@ -31,7 +31,7 @@ namespace UrgentnaJedinica
                     Pacijent p = (Pacijent)formatter.Deserialize(ms);
                     Console.WriteLine($"Obrada pacijenta: {p.Ime} {p.Prezime}");
 
-                    System.Threading.Thread.Sleep(1000);
+                    System.Threading.Thread.Sleep(3000);
 
                     p.StatusPacijenta = "primljen/a";
                     Console.WriteLine("Pacijent je primljen u bolnicu.");

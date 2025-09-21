@@ -15,7 +15,7 @@ namespace Server
         static Jedinica terapeutska = new Jedinica(TipJedinice.Terapeutska, 2, Zauzece.Slobodna);
         static Jedinica dijagnosticka = new Jedinica(TipJedinice.Dijagnosticka, 3, Zauzece.Slobodna);
         static List<Jedinica> jedinice = new List<Jedinica> { urgentna, terapeutska, dijagnosticka };
-
+        static List<Pacijent> pacijentiZaIspis = new List<Pacijent>();
         static void Main(string[] args)
         {
             Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -32,7 +32,6 @@ namespace Server
             Console.WriteLine($"Povezan novi klijent, adresa {clientEP}");
 
             byte[] buffer = new byte[4096];
-            List<Pacijent> pacijentiZaIspis = new List<Pacijent>();
             BinaryFormatter binaryFormatter = new BinaryFormatter();
 
             while (true)
@@ -50,14 +49,12 @@ namespace Server
                         {
                             Pacijent odgovor = ProslediJedinici(p, urgentna);
                             pacijentiZaIspis.Add(odgovor);
-                            IspisiTabelu(pacijentiZaIspis);
                         }
 
                         foreach (var p in paket.Ostali)
                         {
                             Pacijent odgovor = ProslediJedinici(p, (p.VrstaZahteva=="terapija") ? terapeutska : dijagnosticka);
                             pacijentiZaIspis.Add(odgovor);
-                            IspisiTabelu(pacijentiZaIspis);
                         }
                     }
                 }
@@ -100,7 +97,7 @@ namespace Server
                 client.Connect(IPAddress.Loopback, port);
 
                 jedinica.Status = Zauzece.Zauzeta;
-                IspisiTabeluJedinica(jedinice);
+                IspisiStanje(pacijentiZaIspis, jedinice);
 
                 BinaryFormatter formatter = new BinaryFormatter();
                 using (MemoryStream ms = new MemoryStream())
@@ -116,7 +113,7 @@ namespace Server
                     Pacijent odgovor = (Pacijent)formatter.Deserialize(msIn);
 
                     jedinica.Status = Zauzece.Slobodna;
-                    IspisiTabeluJedinica(jedinice);
+                    IspisiStanje(pacijentiZaIspis, jedinice);
                     client.Close();
                     return odgovor;
                 }
@@ -128,15 +125,27 @@ namespace Server
             }
         }
 
-        static void IspisiTabelu(List<Pacijent> pacijenti)
+        static void IspisiStanje(List<Pacijent> pacijenti, List<Jedinica> jedinice)
         {
             Console.Clear();
 
+            Console.WriteLine("STANJE JEDINICA");
+            Console.WriteLine("{0,-15} | {1,-10}", "Tip jedinice", "Status");
+            Console.WriteLine(new string('-', 30));
+
+            foreach (var j in jedinice)
+            {
+                Console.WriteLine("{0,-15} | {1,-10}", j.TipJedinice, j.Status);
+            }
+
+            Console.WriteLine();
+
+            Console.WriteLine("STANJE PACIJENATA");
             Console.WriteLine(
                 "{0,-10} | {1,-15} | {2,-15} | {3,-20} | {4,-20}",
                 "LBO", "Ime", "Prezime", "Vrsta zahteva", "Status"
             );
-            Console.WriteLine(new string('-', 80));
+            Console.WriteLine(new string('-', 90));
 
             foreach (var p in pacijenti)
             {
@@ -148,14 +157,5 @@ namespace Server
             }
         }
 
-        static void IspisiTabeluJedinica(List<Jedinica> jedinice)
-        {
-            Console.WriteLine("TIP JEDINICE\tSTATUS");
-            foreach (var j in jedinice)
-            {
-                Console.WriteLine($"{j.TipJedinice}\t\t{j.Status}");
-            }
-            Console.WriteLine(); // razmak pre tabele pacijenata
-        }
     }
 }
