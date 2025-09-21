@@ -27,7 +27,6 @@ namespace Server
 
             byte[] buffer = new byte[4096];
             List<Pacijent> pacijenti = new List<Pacijent>();
-            List<Pacijent> pacijentiAzurirani = new List<Pacijent>();
             BinaryFormatter binaryFormatter = new BinaryFormatter();
 
             while (true)
@@ -42,12 +41,10 @@ namespace Server
                     {
                         Pacijent p = (Pacijent)binaryFormatter.Deserialize(ms);
                         pacijenti.Add(p);
-                        Pacijent azuriranPacijent = ProslediJedinici(p);
-
-                        pacijentiAzurirani.Add(azuriranPacijent);
+                        p = ProslediJedinici(p);
 
                         Console.WriteLine("Ažurirani podaci o pacijentu:");
-                        azuriranPacijent.Ispisi();
+                        p.Ispisi();
                     }
                 }
                 catch (Exception ex)
