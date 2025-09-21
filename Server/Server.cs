@@ -78,6 +78,9 @@ namespace Server
                 case "urgentna pomoc":
                     port = 60003;
                     break;
+                case "urgentna pomoć":
+                    port = 60003;
+                    break;
             }
 
             try
