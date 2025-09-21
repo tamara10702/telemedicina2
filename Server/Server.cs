@@ -26,7 +26,7 @@ namespace Server
             Console.WriteLine($"Povezan novi klijent, adresa {clientEP}");
 
             byte[] buffer = new byte[4096];
-            List<Pacijent> pacijenti = new List<Pacijent>();
+            List<Pacijent> pacijentiZaIspis = new List<Pacijent>();
             BinaryFormatter binaryFormatter = new BinaryFormatter();
 
             while (true)
@@ -43,15 +43,15 @@ namespace Server
                         foreach (var p in paket.Urgentni)
                         {
                             Pacijent odgovor = ProslediJedinici(p);
-                            Console.WriteLine("Ažurirani podaci o pacijentu (urgentni):");
-                            odgovor.Ispisi();
+                            pacijentiZaIspis.Add(odgovor);
+                            IspisiTabelu(pacijentiZaIspis);
                         }
 
                         foreach (var p in paket.Ostali)
                         {
                             Pacijent odgovor = ProslediJedinici(p);
-                            Console.WriteLine("Ažurirani podaci o pacijentu (ostali):");
-                            odgovor.Ispisi();
+                            pacijentiZaIspis.Add(odgovor);
+                            IspisiTabelu(pacijentiZaIspis);
                         }
                     }
                 }
@@ -113,6 +113,26 @@ namespace Server
             {
                 Console.WriteLine($"Greška: {ex.Message}");
                 return p;
+            }
+        }
+
+        static void IspisiTabelu(List<Pacijent> pacijenti)
+        {
+            Console.Clear();
+
+            Console.WriteLine(
+                "{0,-10} | {1,-15} | {2,-15} | {3,-20} | {4,-20}",
+                "LBO", "Ime", "Prezime", "Vrsta zahteva", "Status"
+            );
+            Console.WriteLine(new string('-', 80));
+
+            foreach (var p in pacijenti)
+            {
+                string status = string.IsNullOrEmpty(p.StatusPacijenta) ? "Nepoznat" : p.StatusPacijenta;
+                Console.WriteLine(
+                    "{0,-10} | {1,-15} | {2,-15} | {3,-20} | {4,-20}",
+                    p.LBO, p.Ime, p.Prezime, p.VrstaZahteva, status
+                );
             }
         }
     }
