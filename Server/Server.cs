@@ -65,6 +65,8 @@ namespace Server
                 }
             }
 
+            IspisiStanje(pacijentiZaIspis, jedinice);
+
             Console.WriteLine("Server se zatvara");
             acceptedSocket.Close();
             serverSocket.Close();
