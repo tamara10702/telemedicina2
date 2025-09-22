@@ -145,7 +145,7 @@ namespace Server
 
         static void IspisiStanje(List<Pacijent> pacijenti, List<Jedinica> jedinice)
         {
-            Console.Clear();
+            Console.SetCursorPosition(0, 0);
 
             Console.WriteLine("STANJE JEDINICA");
             Console.WriteLine("{0,-15} | {1,-10}", "Tip jedinice", "Status");
