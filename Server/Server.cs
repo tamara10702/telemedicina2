@@ -23,54 +23,69 @@ namespace Server
 
             serverSocket.Bind(serverEP);
             serverSocket.Listen(5);
+            serverSocket.Blocking = false;
 
-            Console.WriteLine("Server je u stanju slušanja");
-
-            Socket acceptedSocket = serverSocket.Accept();
-
-            IPEndPoint clientEP = acceptedSocket.RemoteEndPoint as IPEndPoint;
-            Console.WriteLine($"Povezan novi klijent, adresa {clientEP}");
+            List<Socket> sockets = new List<Socket> { serverSocket };
 
             byte[] buffer = new byte[4096];
             BinaryFormatter binaryFormatter = new BinaryFormatter();
 
             while (true)
             {
-                try
+                List<Socket> checkRead = new List<Socket>(sockets);
+                Socket.Select(checkRead, null, null, 1000);
+
+                foreach (Socket s in checkRead)
                 {
-                    int brBajta = acceptedSocket.Receive(buffer);
-                    if (brBajta == 0) break;
-
-                    using (MemoryStream ms = new MemoryStream(buffer, 0, brBajta))
+                    if (s == serverSocket)
                     {
-                        PaketPacijenata paket = (PaketPacijenata)binaryFormatter.Deserialize(ms);
+                        Socket acceptedSocket = serverSocket.Accept();
+                        acceptedSocket.Blocking = false;
+                        sockets.Add(acceptedSocket);
 
-                        foreach (var p in paket.Urgentni)
+                        IPEndPoint clientEP = acceptedSocket.RemoteEndPoint as IPEndPoint;
+                        Console.WriteLine($"Povezan novi klijent, adresa {clientEP}");
+                    }
+                    else
+                    {
+                        int brBajta = 0;
+                        try
                         {
-                            Pacijent odgovor = ProslediJedinici(p, urgentna);
-                            pacijentiZaIspis.Add(odgovor);
+                            brBajta = s.Receive(buffer);
+                            if (brBajta == 0)
+                            {
+                                Console.WriteLine("Klijent zatvoren.");
+                                s.Close();
+                                sockets.Remove(s);
+                                continue;
+                            }
+                        }
+                        catch
+                        {
+                            continue; 
                         }
 
-                        foreach (var p in paket.Ostali)
+                        using (MemoryStream ms = new MemoryStream(buffer, 0, brBajta))
                         {
-                            Pacijent odgovor = ProslediJedinici(p, (p.VrstaZahteva=="terapija") ? terapeutska : dijagnosticka);
-                            pacijentiZaIspis.Add(odgovor);
+                            PaketPacijenata paket = (PaketPacijenata)binaryFormatter.Deserialize(ms);
+
+                            foreach (var p in paket.Urgentni)
+                            {
+                                Pacijent odgovor = ProslediJedinici(p, urgentna);
+                                pacijentiZaIspis.Add(odgovor);
+                            }
+
+                            foreach (var p in paket.Ostali)
+                            {
+                                Pacijent odgovor = ProslediJedinici(p, (p.VrstaZahteva == "terapija") ? terapeutska : dijagnosticka);
+                                pacijentiZaIspis.Add(odgovor);
+                            }
                         }
+
+                        IspisiStanje(pacijentiZaIspis, jedinice);
                     }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Greška: {ex.Message}");
-                    break;
-                }
             }
-
-            IspisiStanje(pacijentiZaIspis, jedinice);
-
-            Console.WriteLine("Server se zatvara");
-            acceptedSocket.Close();
-            serverSocket.Close();
-            Console.ReadKey();
         }
 
         static Pacijent ProslediJedinici(Pacijent p, Jedinica jedinica)
