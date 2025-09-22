@@ -163,7 +163,7 @@ namespace Server
                 "{0,-10} | {1,-15} | {2,-15} | {3,-20} | {4,-20} | {5, -20}",
                 "LBO", "Ime", "Prezime", "Vrsta zahteva", "Status", "Vreme obrade"
             );
-            Console.WriteLine(new string('-', 90));
+            Console.WriteLine(new string('-', 110));
 
             foreach (var p in pacijenti)
             {
